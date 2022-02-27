@@ -188,13 +188,14 @@ def chef_thread(chef_name, restaurant):
                 time.sleep(1)
 
 
-
+#TODO
 def customer_process(customer_self):
     """
     Function a customer process will run
     """
     pass
 
+#TODO
 def create_customer_processes(restaurant):
     """
     Create customer processes
@@ -208,6 +209,7 @@ def create_customer_processes(restaurant):
     pass
 
 
+#TODO
 def create_chef_threads(num_chefs=4, restaurant=None):
     """
     Calls chef_thread() method to create chef threads
@@ -216,7 +218,7 @@ def create_chef_threads(num_chefs=4, restaurant=None):
     # return chefs
     pass
 
-
+#TODO
 def main():
     pass
 
