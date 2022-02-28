@@ -43,10 +43,12 @@ class Restaurant:
     def print_chef_workload(self, num_customers) -> None:
         total_jobs = 0
         for chef in self.chefs:
-            print(colored(f"Chef #{chef.name:<3}", "cyan") + colored(" handled ", "green") + colored(f"{chef.orders_handled}", "cyan") + colored(" jobs", "green"),flush=True)
+            print(colored(f"Chef #{chef.name:<3}", "cyan") + colored(" handled ", "green") + colored(f"{chef.orders_handled:<4}", "cyan") + colored(" jobs", "green"),flush=True)
             total_jobs += chef.orders_handled
-        print(colored("Total jobs handled: ", "green") + colored(f"{total_jobs}", "cyan"),flush=True)
-        print(colored("Total jobs missed: ", "green") + colored(f"{abs(num_customers - total_jobs)}", "cyan"),flush=True)
+        
+        print(colored("[MONEY]\t\t","green") + colored(f"${self.print_money_in_register()}","cyan"),flush=True)
+        print(colored("[JOBS]\t\t", "green") + colored(f"{total_jobs}", "cyan"),flush=True)
+        print(colored("[MISSED]\t", "red") + colored(f"{abs(num_customers - total_jobs)}", "cyan"),flush=True)
 
     def hire_chef(self, chef) -> None:
         """
@@ -56,7 +58,7 @@ class Restaurant:
         chef.register_lock = self.register_key
         with self.hiring_manager:
             self.chefs.append(chef)
-        print(colored(f"***Chef #{chef.name} has been hired!***", "green"), flush=True)
+        print(colored(f"[HIRED]\t\t", "green") + colored(f"Chef #{chef.name}","cyan") + colored(" has been hired", "white"), flush=True)
 
     def put_money_in_register(self, amount) -> None:
         self.cash_register += amount
@@ -112,9 +114,9 @@ class Chef:
         # MenuItem(name, prep_time, price))
         menu_item = self.restaurant.get_menu_item(item_name)
         
-        print(colored(f"***Chef #{self.name} is cooking {customer_id}'s order***", "white"),flush=True)
+        print(colored(f"[COOKING]\t", "magenta") + colored(f"Chef #{self.name}","cyan") + colored(f" is cooking ", "white") + colored(f"Customer {customer_id}", "blue") + colored("'s order", "white"),flush=True)
         time.sleep(menu_item.prep_time)
-        print(colored(f"***Chef #{self.name} is done cooking {customer_id}'s order***", "red"),flush=True)
+        print(colored(f"[COOKING]\t", "magenta") + colored(f"Chef #{self.name}","cyan") + colored(f" is done cooking ", "white") + colored(f"Customer {customer_id}", "blue") + colored("'s order", "white"),flush=True)
         phone_number.send(menu_item.name)
         phone_number.close()
 
@@ -152,7 +154,7 @@ class Customer:
             "item_name": self.item_name #name of menu item
         }
         self.restaurant.job_queue.put(order, block=True)
-        print(colored(f"***Added {self.id}'s order to the job queue***","blue"), flush=True)
+        print(colored(f"[ORDER]\t\t","blue") + colored(f"Customer {self.id}", "blue") + colored("'s order has been added to the job queue","white"), flush=True)
         self.start_time = datetime.datetime.now()
     
     def wait_for_order(self) -> None:
@@ -167,7 +169,7 @@ class Customer:
             self.customer_phone_number_for_pickup_order.close()
             self._leave_review(ordered_food)
         else:
-            print(colored(f"***{self.id} lost patience and left***", "yellow"), flush=True)
+            print(colored(f"[LEAVE]\t\t", "red") + colored(f"Customer {self.id}", "blue") + colored(f" lost patience and left", "yellow"), flush=True)
             os.kill(self.id, signal.SIGKILL)
 
 
@@ -176,7 +178,7 @@ class Customer:
         """
         Customer shares how long their order took to complete
         """
-        print(colored(f"***{self.id} has received their order of {ordered_food} (took {self.end_time} seconds)***", "magenta"), flush=True)
+        print(colored(f"[COMPLETE]\t", "magenta") + colored(f"Customer {self.id}", "blue") + colored(f" has received their order of ","white") + colored(ordered_food,"cyan") + colored(" (took ","white") + colored(self.end_time, "cyan") + colored(" seconds)", "white"), flush=True)
     
 
 def run_chef_thread(chef_name, restaurant) -> None:
@@ -189,19 +191,19 @@ def run_chef_thread(chef_name, restaurant) -> None:
     while 1:
         if chef.current_order:
             try:
-                print(colored(f"***Chef #{chef.name} has taken an order (", "green") + colored(f"{chef.current_order['item_name']}", "cyan") + colored(" for ", "green") +  colored(f"{chef.current_order['customer_id']}", "cyan") + colored(")***","green"),flush=True)
+                print(colored(f"[JOB]\t\t", "green") + colored(f"Chef #{chef.name}","cyan") + colored(f" has taken an order (", "white") + colored(f"{chef.current_order['item_name']}", "cyan") + colored(" for ", "white") +  colored(f"Customer {chef.current_order['customer_id']}", "blue") + colored(")","white"),flush=True)
                 price = chef.handle_order()
                 chef.put_money_in_register(price)
                 chef.orders_handled+=1
             except Exception as e:
-                print(colored(f"***Chef #{chef.name} failed an order***\nReason: {e}", "yellow"),flush=True)
+                print(colored(f"[ERROR]\t\t", "red") + colored(f"Chef #{chef.name}","cyan") + colored(f" failed an order (Reason: {e})", "red"),flush=True)
             finally:
                 chef.current_order = None
         else:
             try:
                 chef.get_order()
             except:
-                print(colored(f"***Chef #{chef.name} couldn't find an order in the queue***", "yellow"),flush=True)
+                print(colored(f"[ERROR]\t\t", "red") + colored(f"Chef #{chef.name}","cyan") + colored(f" couldn't find an order in the queue", "red"),flush=True)
             finally:
                 time.sleep(0.5)
 
@@ -215,7 +217,7 @@ def run_customer_process(item_name, queue, restaurant):
     time.sleep(random.randint(0,5))
     customer.place_order()
     customer.wait_for_order()
-    print(colored("***","red") + colored(f"{customer.id}", "cyan") + colored(" has left the restaurant***","red"),flush=True)
+    print(colored("[SUCCESS]\t","green") + colored(f"Customer {customer.id}", "blue") + colored(" has left the restaurant","white"),flush=True)
     exit(0)
 
 
@@ -227,7 +229,6 @@ def create_customer_processes(restaurant, queue, num_customers=multiprocessing.c
     menu = list(restaurant.menu.keys())
     for _ in range(num_customers):
         item_name = random.choice(menu)
-        # customer_phone_number, restaurant_phone_number = multiprocessing.Pipe()
         customer_process = multiprocessing.Process(target=run_customer_process, args=(item_name, queue, restaurant))
         customer_processes.append(customer_process)
 
@@ -265,9 +266,9 @@ def main():
         num_chefs = int(num_chefs)
 
     chefs = create_chef_threads(num_chefs, my_restaurant)
-    print(colored(f"***Chefs have started working!***", "red"),flush=True)    
+    print(colored(f"[INIT]\t", "yellow") + colored(f"Chefs have started working", "red"),flush=True)    
 
-    num_customers = str(input(colored(f"Enter number of customers (min: {num_chefs})> ","cyan")))
+    num_customers = str(input(colored(f"Enter number of customers (min: {num_chefs})> ","blue")))
     if num_customers.strip().replace('\n','') == '':
         print(colored("Invalid amount -- using default amount (30 customers)","red"),flush=True)
         num_customers = 30
@@ -294,7 +295,6 @@ def main():
         customer.join()
     
     print(colored(f"***Restaurant has closed for the day***", "green"),flush=True)
-    print(colored("Restaurant made ","green") + colored(f"${my_restaurant.print_money_in_register()}","cyan"),flush=True)
     my_restaurant.print_chef_workload(num_customers)
 
 
