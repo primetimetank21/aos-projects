@@ -1,6 +1,4 @@
 import os, signal
-# import sys
-#maybe make chefs threads and customers processes?
 import multiprocessing
 import threading
 import time
@@ -42,12 +40,13 @@ class Restaurant:
         self.job_queue = multiprocessing.Queue()
 
 
-    def print_chef_workload(self) -> None:
+    def print_chef_workload(self, num_customers) -> None:
         total_jobs = 0
         for chef in self.chefs:
             print(colored(f"Chef #{chef.name:<3}", "cyan") + colored(" handled ", "green") + colored(f"{chef.orders_handled}", "cyan") + colored(" jobs", "green"),flush=True)
             total_jobs += chef.orders_handled
         print(colored("Total jobs handled: ", "green") + colored(f"{total_jobs}", "cyan"),flush=True)
+        print(colored("Total jobs missed: ", "green") + colored(f"{abs(num_customers - total_jobs)}", "cyan"),flush=True)
 
     def hire_chef(self, chef) -> None:
         """
@@ -204,7 +203,7 @@ def run_chef_thread(chef_name, restaurant) -> None:
             except:
                 print(colored(f"***Chef #{chef.name} couldn't find an order in the queue***", "yellow"),flush=True)
             finally:
-                time.sleep(1)
+                time.sleep(0.5)
 
 
 def run_customer_process(item_name, queue, restaurant):
@@ -253,14 +252,15 @@ def main():
     print(colored(f"***Restaurant has opened for business!***", "red"),flush=True)
     
     num_chefs = str(input(colored("Enter number of chefs to hire (max: 10)> ","cyan")))
-    if int(num_chefs) <= 0:
+    if num_chefs.strip().replace('\n','') == '':
+        print(colored("Invalid amount -- using default amount (4 chefs)","red"),flush=True)
+        num_chefs = 4
+    elif int(num_chefs) <= 0:
         print(colored("Invalid amount -- using default amount (4 chefs)","red"),flush=True)
         num_chefs = 4
     elif int(num_chefs) > 10:
         print(colored("Invalid amount -- using max amount (10 chefs)","red"),flush=True)
         num_chefs = 10
-    elif num_chefs is None:
-        num_chefs = 4
     else:
         num_chefs = int(num_chefs)
 
@@ -268,14 +268,15 @@ def main():
     print(colored(f"***Chefs have started working!***", "red"),flush=True)    
 
     num_customers = str(input(colored(f"Enter number of customers (min: {num_chefs})> ","cyan")))
-    if int(num_customers) <= 0:
+    if num_customers.strip().replace('\n','') == '':
+        print(colored("Invalid amount -- using default amount (30 customers)","red"),flush=True)
+        num_customers = 30
+    elif int(num_customers) <= 0:
         print(colored("Invalid amount -- using default amount (30 customers)","red"),flush=True)
         num_customers = 30
     elif int(num_customers) > 100:
         print(colored("Invalid amount -- using \"max\" amount (100 customers)","red"),flush=True)
         num_customers = 100
-    elif num_customers is None:
-        num_customers = 30
     else:
         num_customers = int(num_customers)
 
@@ -294,7 +295,7 @@ def main():
     
     print(colored(f"***Restaurant has closed for the day***", "green"),flush=True)
     print(colored("Restaurant made ","green") + colored(f"${my_restaurant.print_money_in_register()}","cyan"),flush=True)
-    my_restaurant.print_chef_workload()
+    my_restaurant.print_chef_workload(num_customers)
 
 
 

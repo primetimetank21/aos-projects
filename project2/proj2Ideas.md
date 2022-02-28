@@ -35,4 +35,4 @@
     - [x] take order from queue
     - [x] keep track of how many orders chef has handled
     - [x] return meal to customer (i.e., send signal via pipe)
-    - [x] put money from meal into cash register
+    - [ ] put money from meal into cash register (make verbose)
