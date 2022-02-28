@@ -248,10 +248,10 @@ def create_chef_threads(num_chefs=4, restaurant=None) -> list:
     return chef_threads
 
 
-def main():
-    my_restaurant = Restaurant()
-    print(colored(f"***Restaurant has opened for business!***", "red"),flush=True)
-    
+def get_user_input() -> tuple:
+    """
+    Get the number of chefs and number of customers the user wants to simulate
+    """
     num_chefs = str(input(colored("Enter number of chefs to hire (max: 10)> ","cyan")))
     if num_chefs.strip().replace('\n','') == '':
         print(colored("Invalid amount -- using default amount (4 chefs)","red"),flush=True)
@@ -265,9 +265,6 @@ def main():
     else:
         num_chefs = int(num_chefs)
 
-    chefs = create_chef_threads(num_chefs, my_restaurant)
-    print(colored(f"[INIT]\t", "yellow") + colored(f"Chefs have started working", "red"),flush=True)    
-
     num_customers = str(input(colored(f"Enter number of customers (min: {num_chefs})> ","blue")))
     if num_customers.strip().replace('\n','') == '':
         print(colored("Invalid amount -- using default amount (30 customers)","red"),flush=True)
@@ -280,11 +277,14 @@ def main():
         num_customers = 100
     else:
         num_customers = int(num_customers)
+    
+    return (num_chefs, num_customers)
 
 
-    customers = create_customer_processes(my_restaurant, my_restaurant.job_queue, num_customers)
-    print(colored(f"***Customers can begin ordering!***", "red"),flush=True)    
-
+def start_restaurant_day(chefs, customers) -> None:
+    """
+    Start chefs (threads) and customers (processes) in the restaurant simulation
+    """
     for chef in chefs:
         chef.start()
 
@@ -293,10 +293,24 @@ def main():
 
     for customer in customers:
         customer.join()
+
+
+def main():
+    my_restaurant = Restaurant()
+    print(colored(f"***Restaurant has opened for business!***", "red"),flush=True)
+    
+    num_chefs, num_customers = get_user_input()
+
+    chefs = create_chef_threads(num_chefs, my_restaurant)
+    print(colored(f"[INIT]\t", "yellow") + colored(f"Chefs have started working", "red"),flush=True)    
+
+    customers = create_customer_processes(my_restaurant, my_restaurant.job_queue, num_customers)
+    print(colored(f"***Customers can begin ordering!***", "red"),flush=True)    
+
+    start_restaurant_day(chefs, customers)
     
     print(colored(f"***Restaurant has closed for the day***", "green"),flush=True)
     my_restaurant.print_chef_workload(num_customers)
-
 
 
 if __name__ == "__main__":
