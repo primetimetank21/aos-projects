@@ -20,18 +20,19 @@
 <br/>
 
 ## **TODOs**
-- [ ] create restaurant
+- [x] create restaurant
     - [x] create menu items
         - [x] name
         - [x] time to prepare
         - [x] price
     - [x] create job queue
     - [x] create cash register (i.e., place to store all money made)
-- [ ] create customers
-    - [ ] create order (varying timing?)
-    - [ ] create time tracker (i.e., moment they place order to when they receive their meal)
-- [ ] create chefs
+    - [x] print money from cash register
+- [x] create customers
+    - [x] create order (varying timing?)
+    - [x] create time tracker (i.e., moment they place order to when they receive their meal)
+- [x] create chefs
     - [x] take order from queue
     - [x] keep track of how many orders chef has handled
-    - [ ] return meal to customer (i.e., send signal via pipe)
-    - [ ] put money from meal into cash register
+    - [x] return meal to customer (i.e., send signal via pipe)
+    - [x] put money from meal into cash register
