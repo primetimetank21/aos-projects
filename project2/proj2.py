@@ -275,6 +275,9 @@ def get_user_input() -> tuple:
     elif int(num_customers) > 100:
         print(colored("Invalid amount -- using \"max\" amount (100 customers)","red"),flush=True)
         num_customers = 100
+    elif int(num_customers) < num_chefs:
+        print(colored("Invalid amount -- using default amount (30 customers)","red"),flush=True)
+        num_customers = 30
     else:
         num_customers = int(num_customers)
     
