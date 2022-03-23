@@ -1,5 +1,5 @@
 from multiprocessing import shared_memory, Semaphore, Process
-from time import sleep
+from time import sleep, time
 from termcolor import colored
 import numpy as np
 import math
@@ -176,4 +176,7 @@ def main():
 
 
 if __name__ == "__main__":
+    start = time()
     main()
+    end = time()
+    print("Ran in " + colored(str(round(end-start, 3)), "yellow") + " seconds")
