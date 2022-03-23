@@ -7,8 +7,7 @@ import os
 from random import randint
 
 def print_current_values(name, arr, idx_changed) -> None:
-    print("Shared array after " + colored(f"Process {name}", "blue") + "'s operation:",end="\t[")#\t{arr} (modified arr[{idx_changed}])\n")
-    # for element in arr:
+    print("Shared array after " + colored(f"Process {name}", "blue") + "'s operation:",end="\t[")
     for i in range(len(arr)):
         if i == idx_changed:
             print(colored(f"{f'{str(arr[i]):<5}' if len(str(arr[i])) <= 5 else f'{str(arr[i])[:5]}...'}", "red"), end=" ")
@@ -17,7 +16,7 @@ def print_current_values(name, arr, idx_changed) -> None:
     print("]\t(modified " +  colored(f"arr[","red") + colored(str(idx_changed), "green") + colored("]", "red") + ")\n")
 
 def print_current_values_parent(pos, arr) -> None:
-    print(f"Shared array at {pos}:\t[",end="")#\t{arr} (modified arr[{idx_changed}])\n")
+    print(f"Shared array at {pos}:\t[",end="")
     # for element in arr:
     for i in range(len(arr)):
         print(colored(f"{str(arr[i])}", "cyan"), end=" ")
@@ -38,6 +37,7 @@ def add(blk_name, semaphore, shape, iterations) -> None:
         sleep(randint(1,3))
     #clean up
     existing_shm.close()
+    exit(0)
 
 def sub(blk_name, semaphore, shape, iterations) -> None:
     #access intial shared copy
@@ -54,6 +54,8 @@ def sub(blk_name, semaphore, shape, iterations) -> None:
         sleep(randint(1,3))
     #clean up
     existing_shm.close()
+    exit(0)
+
 
 def square(blk_name, semaphore, shape, iterations) -> None:
     #access intial shared copy
@@ -70,6 +72,8 @@ def square(blk_name, semaphore, shape, iterations) -> None:
         sleep(randint(1,3))
     #clean up
     existing_shm.close()
+    exit(0)
+
 
 def sqrt(blk_name, semaphore, shape, iterations) -> None:
     #access intial shared copy
@@ -90,6 +94,8 @@ def sqrt(blk_name, semaphore, shape, iterations) -> None:
         sleep(randint(1,3))
     #clean up
     existing_shm.close()
+    exit(0)
+
 
 def create_processes(params) -> list:
     """
@@ -105,7 +111,6 @@ def create_processes(params) -> list:
 
 def main():
     arr = np.random.randint(low=1, high=7, size=10)
-    #ref: https://docs.python.org/3/library/multiprocessing.shared_memory.html
     shm = shared_memory.SharedMemory(create=True, size=arr.nbytes)
     shared_arr = np.ndarray(arr.shape, dtype=arr.dtype, buffer=shm.buf)
     shared_arr[:] = arr[:]  #copy the original data into shared memory
@@ -120,7 +125,6 @@ def main():
     #create processes
     processes = create_processes(params)
 
-    # print(f"Shared array initially: {shared_arr}\n")
     print_current_values_parent("start",shared_arr)
 
     #run processes
@@ -131,9 +135,7 @@ def main():
     for process in processes:
         process.join()
     
-    # print(f"Shared array at end: {shared_arr}\n")
     print_current_values_parent("end", shared_arr)
-
 
     #clean up
     shm.close() 
