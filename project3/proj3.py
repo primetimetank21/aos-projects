@@ -37,6 +37,7 @@ def add(blk_name, semaphore, shape, iterations) -> None:
     #access intial shared copy
     existing_shm = shared_memory.SharedMemory(name=blk_name, create=False)
     arr = np.ndarray(shape, dtype=np.int64, buffer=existing_shm.buf)
+
     pid = os.getpid()
     for _ in range(iterations):
         num = randint(1, max(arr))
@@ -61,6 +62,7 @@ def sub(blk_name, semaphore, shape, iterations) -> None:
     #access intial shared copy
     existing_shm = shared_memory.SharedMemory(name=blk_name, create=False)
     arr = np.ndarray(shape, dtype=np.int64, buffer=existing_shm.buf)
+
     pid = os.getpid()
     for _ in range(iterations):
         num = randint(1, max(arr))
@@ -85,6 +87,7 @@ def square(blk_name, semaphore, shape, iterations) -> None:
     #access intial shared copy
     existing_shm = shared_memory.SharedMemory(name=blk_name, create=False)
     arr = np.ndarray(shape, dtype=np.int64, buffer=existing_shm.buf)
+
     pid = os.getpid()
     for _ in range(iterations):
         idx = randint(0,arr.size-1)
@@ -109,6 +112,7 @@ def sqrt(blk_name, semaphore, shape, iterations) -> None:
     #access intial shared copy
     existing_shm = shared_memory.SharedMemory(name=blk_name, create=False)
     arr = np.ndarray(shape, dtype=np.int64, buffer=existing_shm.buf)
+
     pid = os.getpid()
     for _ in range(iterations):
         idx = randint(0,arr.size-1)
@@ -143,12 +147,13 @@ def create_processes(params) -> list:
 
 
 def main():
+    #create shared array
     arr = np.random.randint(low=1, high=7, size=10)
     shm = shared_memory.SharedMemory(create=True, size=arr.nbytes)
     shared_arr = np.ndarray(arr.shape, dtype=arr.dtype, buffer=shm.buf)
-    shared_arr[:] = arr[:]  #copy the original data into shared memory
+    shared_arr[:] = arr[:]  #copy data into shared array
     
-    #params
+    #create params for child processes
     shm_name = shm.name
     semaphore = Semaphore()
     shape = shared_arr.shape
