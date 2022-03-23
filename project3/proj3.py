@@ -7,14 +7,21 @@ import os
 from random import randint
 
 def print_current_values(name, arr, idx_changed) -> None:
-    print(f"Shared array after Process {name}'s operation:",end="\t[ ")#\t{arr} (modified arr[{idx_changed}])\n")
+    print("Shared array after " + colored(f"Process {name}", "blue") + "'s operation:",end="\t[")#\t{arr} (modified arr[{idx_changed}])\n")
     # for element in arr:
     for i in range(len(arr)):
         if i == idx_changed:
-            print(colored(f"{f'{str(arr[i]):<5}' if len(str(arr[i])) < 5 else f'{str(arr[i])[:5]}...'}", "red"), end=" ")
+            print(colored(f"{f'{str(arr[i]):<5}' if len(str(arr[i])) <= 5 else f'{str(arr[i])[:5]}...'}", "red"), end=" ")
         else:
-            print(f"{f'{str(arr[i]):<5}' if len(str(arr[i])) < 5 else f'{str(arr[i])[:5]}...'}", end=" ")
-    print(f"]\t(modified arr[{idx_changed}])\n")
+            print(colored(f"{f'{str(arr[i]):<5}' if len(str(arr[i])) <= 5 else f'{str(arr[i])[:5]}...'}", "cyan"), end=" ")
+    print("]\t(modified " +  colored(f"arr[","red") + colored(str(idx_changed), "green") + colored("]", "red") + ")\n")
+
+def print_current_values_parent(pos, arr) -> None:
+    print(f"Shared array at {pos}:\t[",end="")#\t{arr} (modified arr[{idx_changed}])\n")
+    # for element in arr:
+    for i in range(len(arr)):
+        print(colored(f"{str(arr[i])}", "cyan"), end=" ")
+    print("]\n")
 
 def add(blk_name, semaphore, shape, iterations) -> None:
     #access intial shared copy
@@ -26,7 +33,7 @@ def add(blk_name, semaphore, shape, iterations) -> None:
         idx = randint(0,arr.size-1)
         with semaphore:
             arr[idx] += num
-            print(f"Process {pid} added {num} to {arr[idx] - num} (result: {arr[idx]})")
+            print(colored(f"Process {pid}", "blue") + " added " + colored(str(num), "yellow") + " to " + colored(str(arr[idx] - num), "red") + " (result: " + colored(str(arr[idx]), "red") + ")")
             print_current_values(pid, arr, idx)
         sleep(randint(1,3))
     #clean up
@@ -42,7 +49,7 @@ def sub(blk_name, semaphore, shape, iterations) -> None:
         idx = randint(0,arr.size-1)
         with semaphore:
             arr[idx] -= num
-            print(f"Process {pid} subtracted {num} from {arr[idx] + num} (result: {arr[idx]})")
+            print(colored(f"Process {pid}", "blue") + " subtracted " +  colored(str(num), "yellow") + " from " + colored(str(arr[idx] + num), "red") + " (result: " + colored(str(arr[idx]), "red") + ")")
             print_current_values(pid, arr, idx)
         sleep(randint(1,3))
     #clean up
@@ -58,7 +65,7 @@ def square(blk_name, semaphore, shape, iterations) -> None:
         with semaphore:
             num = arr[idx]
             arr[idx] = num**2
-            print(f"Process {pid} squared {num} (result: {arr[idx]})")
+            print(colored(f"Process {pid}", "blue") + " squared " + colored(str(num), "red") + " (result: " + colored(str(arr[idx]), "red") + ")")
             print_current_values(pid, arr, idx)
         sleep(randint(1,3))
     #clean up
@@ -74,11 +81,11 @@ def sqrt(blk_name, semaphore, shape, iterations) -> None:
         with semaphore:
             num = arr[idx]
             if num < 0:
-                print(f"Process {pid} couldn't take sqrt of {num} (it is negative)")
+                print(colored(f"Process {pid}", "blue") + " couldn't take sqrt of " + colored(str(num), "red") + colored(" (it is negative)", "yellow"))
                 print_current_values(pid, arr, idx)
                 continue
             arr[idx] = math.floor(math.sqrt(num))
-            print(f"Process {pid} took sqrt of {num} (result: {arr[idx]})")
+            print(colored(f"Process {pid}", "blue") + " took sqrt of " + colored(str(num), "red") + " (result: " + colored(str(arr[idx]), "red") + ")")
             print_current_values(pid, arr, idx)
         sleep(randint(1,3))
     #clean up
@@ -113,7 +120,8 @@ def main():
     #create processes
     processes = create_processes(params)
 
-    print(f"Shared array initially: {shared_arr}\n")
+    # print(f"Shared array initially: {shared_arr}\n")
+    print_current_values_parent("start",shared_arr)
 
     #run processes
     for process in processes:
@@ -123,7 +131,9 @@ def main():
     for process in processes:
         process.join()
     
-    print(f"Shared array at end: {shared_arr}\n")
+    # print(f"Shared array at end: {shared_arr}\n")
+    print_current_values_parent("end", shared_arr)
+
 
     #clean up
     shm.close() 
