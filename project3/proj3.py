@@ -62,6 +62,7 @@ def sqrt(blk_name, semaphore, shape, iterations) -> None:
             num = arr[idx]
             if num < 0:
                 print(f"{sqrt.__name__:<6} couldn't take sqrt of {num} (it is negative)")
+                print_current_values(sqrt.__name__, arr, idx)
                 continue
             arr[idx] = math.floor(math.sqrt(num))
             print(f"{sqrt.__name__:<6} took sqrt of {num}")
@@ -98,6 +99,8 @@ def main():
 
     #create processes
     processes = create_processes(params)
+
+    print(f"Shared array initially: {shared_arr}\n")
 
     #run processes
     for process in processes:
