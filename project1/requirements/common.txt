@@ -1,0 +1,9 @@
+# Formatting, Linting, and Testing Dependencies
+mypy
+ruff
+pytest
+mock
+pytest-cov
+
+# Terminal Colors Dependencies
+termcolor
